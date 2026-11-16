@@ -11,7 +11,7 @@ export function uid(prefix = 'id'): string {
  * Market data snapshot, November 2026. Everything here can be edited in the UI.
  *  - Mortgage rates: broker price lists (Pretto, DB France Invest), November 2026, mid profiles.
  *  - Social levies on PEA gains 18.6 % and flat tax 31.4 %: LFSS 2026 (CSG 9.2 → 10.6 %), applied from 1 Jan 2026.
- *  - Livret A: 1.70 % (to be confirmed on service-public.fr, reviewed every 1 Feb / 1 Aug).
+ *  - Livret A: 1.50 % since 1 Feb 2026 (reviewed every 1 Feb / 1 Aug; a rise to 1.70 % was reported for Aug 2026 but not confirmed).
  *  - HCSF: max debt ratio 35 % (insurance included), max term 25 years (27 for new builds / major works).
  */
 export const MARKET_SNAPSHOT_DATE = '2026-11'
@@ -27,7 +27,7 @@ export const DEFAULT_MARKET: Market = {
   psRate: 0.186,
   pfuRate: 0.314,
   overflow: 'cto',
-  livretRate: 0.017,
+  livretRate: 0.015,
   homeAppreciation: 0.02,
   rentGrowth: 0.02,
   inflation: 0.02,
