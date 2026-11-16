@@ -219,3 +219,29 @@ describe('deficit warnings', () => {
     expect(Math.floor((last.firstDeficitMonthRenter - 1) / 12) + 1).toBeGreaterThan(20)
   })
 })
+
+describe('insolvency cut', () => {
+  it('stops the comparison before the household runs out of savings', async () => {
+    const { cutScenario } = await import('./analysis')
+    const sc = defaultScenario()
+    Object.assign(sc.profile, { netIncomeMonthly: 5300, incomeTaxMonthly: 350, incomeGrowth: 0.01, livingExpensesMonthly: 2800, savings: 76000, emergencyFund: 25000, existingPea: { value: 8790, deposits: 7200, ageYears: 2 } })
+    Object.assign(sc.option, { price: 335000, downPayment: 40000, years: 25, rateOverride: 0.0385 })
+    Object.assign(sc.rent, { rentMonthly: 1640, insuranceAnnual: 280, energyAnnual: 1200 })
+    Object.assign(sc.market, { peaReturn: 0.04, homeAppreciation: 0.01, rentGrowth: 0.015, horizonYears: 20 })
+    const { sc: cutSc, cut } = cutScenario(sc)
+    expect(cut).not.toBeNull()
+    expect(cut!.who).toBe('buy')
+    expect(cut!.effective).toBeLessThan(20)
+    expect(cutSc.market.horizonYears).toBe(cut!.effective)
+    // within the cut horizon nobody is overdrawn
+    const res = simulate(cutSc)
+    expect(res.minCashBuyer).toBeGreaterThanOrEqual(-0.5)
+    expect(res.minCashRenter).toBeGreaterThanOrEqual(-0.5)
+  })
+
+  it('leaves a viable scenario untouched', async () => {
+    const { cutScenario } = await import('./analysis')
+    const { cut } = cutScenario(defaultScenario())
+    expect(cut).toBeNull()
+  })
+})

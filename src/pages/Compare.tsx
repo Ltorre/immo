@@ -1,4 +1,4 @@
-import { useDeferredValue, useMemo } from 'react'
+import { useMemo } from 'react'
 import {
   applyPatch, breakEvenYear, diffAt, downPaymentSweep, durationHorizonGrid, returnsHeatmap, simulateLong, debtCheck,
 } from '../engine/analysis'
@@ -7,6 +7,8 @@ import { atHorizon, toReal } from '../engine/simulate'
 import { Callout, Card } from '../ui/fields'
 import { divergingStyle } from '../ui/charts'
 import { useApp } from '../state'
+import { useCutScenario } from '../hooks'
+import CutNotice from '../ui/CutNotice'
 
 const LOAN_YEARS = [10, 15, 20, 25]
 const HORIZONS = [5, 7, 10, 15, 20, 25, 30]
@@ -15,10 +17,11 @@ const APPRECIATIONS = [-0.02, -0.01, 0, 0.01, 0.02, 0.03, 0.04, 0.05]
 const PEA_RETURNS = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]
 
 export default function Compare() {
-  const { scenario, state } = useApp()
-  const sc = useDeferredValue(scenario)
+  const { state } = useApp()
+  const { sc, cut } = useCutScenario()
   return (
     <div className="stack">
+      <CutNotice cut={cut} />
       <OptionsTable sc={sc} real={state.real} />
       <Regimes sc={sc} real={state.real} />
       <DurationGrid sc={sc} real={state.real} />

@@ -1,13 +1,14 @@
 import { HCSF_MAX_DEBT_RATIO, HCSF_MAX_YEARS, HCSF_MAX_YEARS_WORKS } from '../engine/defaults'
 import { Callout, Card, Stat } from '../ui/fields'
 import { LineChart } from '../ui/charts'
+import CutNotice from '../ui/CutNotice'
 import { useBreakEvens, useMain } from '../hooks'
 import { useApp } from '../state'
 import type { Solved } from '../engine/analysis'
 
 export default function Results({ go }: { go: (tab: string) => void }) {
   const { t, fmt, state, option } = useApp()
-  const { sc, res, horizon, pt, dc, adj } = useMain()
+  const { sc, res, horizon, pt, dc, adj, cut } = useMain()
   const be = useBreakEvens()
   const a = res.acquisition
 
@@ -22,7 +23,7 @@ export default function Results({ go }: { go: (tab: string) => void }) {
   const maxYears = option.kind === 'new' || option.worksInitial > 0 ? HCSF_MAX_YEARS_WORKS : HCSF_MAX_YEARS
   const warnings: { kind: 'warn' | 'bad' | 'info'; text: string }[] = []
   if (res.downPaymentShortfall > 0) warnings.push({ kind: 'bad', text: t('warn.shortfall', { amount: fmt.eur(res.downPaymentShortfall) }) })
-  if (pt.deficitMonthsBuyer > 0) warnings.push({ kind: 'bad', text: t('warn.deficit', { months: pt.deficitMonthsBuyer, year: Math.floor((pt.firstDeficitMonthBuyer - 1) / 12) + 1, min: fmt.eur(Math.min(0, pt.minCashBuyer)) }) })
+  if (pt.deficitMonthsBuyer > 0) warnings.push({ kind: 'warn', text: t('warn.deficit', { months: pt.deficitMonthsBuyer, year: Math.floor((pt.firstDeficitMonthBuyer - 1) / 12) + 1 }) })
   if (dc.ratio > HCSF_MAX_DEBT_RATIO + 1e-9) warnings.push({ kind: 'warn', text: t('warn.ratio', { ratio: fmt.pct(dc.ratio), max: fmt.pct(HCSF_MAX_DEBT_RATIO, 0) }) })
   if (option.years > maxYears) warnings.push({ kind: 'warn', text: t('warn.duration', { years: option.years, max: maxYears }) })
   if (a.downPayment < a.notary + a.agency) warnings.push({ kind: 'warn', text: t('warn.apport', { fees: fmt.eur(a.notary + a.agency) }) })
@@ -112,6 +113,8 @@ export default function Results({ go }: { go: (tab: string) => void }) {
           />
         </div>
       </Card>
+
+      <CutNotice cut={cut} />
 
       {warnings.length > 0 && (
         <div className="stack tight">

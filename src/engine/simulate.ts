@@ -236,6 +236,7 @@ export function runSim(prep: Prepared, paths?: Paths): SimResult {
   let incomeF = 1, exprF = 1, chF = 1, rentF = 1
   let deficitB = 0, deficitR = 0
   let firstB = 0, firstR = 0
+  let insB = 0, insR = 0
   let minCashB = buyer.livret, minCashR = renter.livret
   const cumB = zeroCum()
   const cumR = { rent: 0, rentInsurance: 0, rentEnergy: 0 }
@@ -357,6 +358,8 @@ export function runSim(prep: Prepared, paths?: Paths): SimResult {
     if (surR >= 0) renter.invest(surR, m.peaCap, m.overflow)
     else { renter.cover(-surR, ptax, m.pfuRate); deficitR++; if (!firstR) firstR = idx + 1 }
     if (buyer.livret < minCashB) minCashB = buyer.livret
+    if (!insB && buyer.livret < -0.5) insB = idx + 1
+    if (!insR && renter.livret < -0.5) insR = idx + 1
     if (renter.livret < minCashR) minCashR = renter.livret
 
     cumB.interest += interest
@@ -396,6 +399,8 @@ export function runSim(prep: Prepared, paths?: Paths): SimResult {
       surplusRenter: y1SurR / n1,
     },
     downPaymentShortfall: shortfall,
+    firstInsolventMonthBuyer: insB,
+    firstInsolventMonthRenter: insR,
     deficitMonthsBuyer: deficitB,
     deficitMonthsRenter: deficitR,
     minCashBuyer: minCashB,

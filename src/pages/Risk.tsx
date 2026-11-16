@@ -3,10 +3,12 @@ import { monteCarlo } from '../engine/montecarlo'
 import { Callout, Card, Grid, Num, Pct, Stat } from '../ui/fields'
 import { Histogram, LineChart } from '../ui/charts'
 import { useApp } from '../state'
+import { useCutScenario } from '../hooks'
+import CutNotice from '../ui/CutNotice'
 
 export default function Risk() {
-  const { t, fmt, state, update, scenario } = useApp()
-  const sc = useDeferredValue(scenario)
+  const { t, fmt, state, update } = useApp()
+  const { sc, cut } = useCutScenario()
   const mcp = useDeferredValue(state.mc)
   const mc = useMemo(() => monteCarlo(sc, mcp), [sc, mcp])
   const p = state.mc
@@ -20,6 +22,7 @@ export default function Risk() {
 
   return (
     <div className="stack">
+      <CutNotice cut={cut} />
       <Callout kind="info">{t('risk.intro')}</Callout>
 
       <Card title={t('risk.params')} desc={t('risk.paramsDesc')}>

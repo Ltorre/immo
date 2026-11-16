@@ -247,6 +247,9 @@ export interface SimResult {
   }
   /** Shortfall of the down payment once savings and the PEA are used (0 when feasible). */
   downPaymentShortfall: number
+  /** First month (1-based, 0 = never) in which ALL savings are gone and cash would go negative: the scenario is no longer viable. */
+  firstInsolventMonthBuyer: number
+  firstInsolventMonthRenter: number
   /** Number of months in which the household has to dip into savings. */
   deficitMonthsBuyer: number
   deficitMonthsRenter: number

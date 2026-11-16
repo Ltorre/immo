@@ -282,3 +282,31 @@ export function borrowingCapacity(sc: Scenario, years: number, down: number, max
   const price = (maxLoan * (1 - g) + down + extra - fixed) / (1 + o.notaryPct + o.agencyPct)
   return { maxPayment, maxLoan, maxPrice: Math.max(0, price) }
 }
+
+export interface Cut {
+  requested: number
+  effective: number
+  /** Who runs out of money first. */
+  who: 'buy' | 'rent' | 'both'
+  /** Year (1-based) in which the savings run out. */
+  year: number
+}
+
+/**
+ * A scenario in which every account is empty and cash would go negative is not viable: beyond that
+ * point the model would silently borrow money for free. The comparison is therefore stopped at the last
+ * full year before the first of the two households runs dry.
+ */
+export function cutScenario(sc: Scenario): { sc: Scenario; cut: Cut | null; res: SimResult } {
+  const res = simulateLong(sc)
+  const h = Math.max(1, Math.round(sc.market.horizonYears))
+  const yb = res.firstInsolventMonthBuyer ? Math.floor((res.firstInsolventMonthBuyer - 1) / 12) + 1 : 0
+  const yr = res.firstInsolventMonthRenter ? Math.floor((res.firstInsolventMonthRenter - 1) / 12) + 1 : 0
+  const year = Math.min(yb || Infinity, yr || Infinity)
+  if (!Number.isFinite(year) || year > h) return { sc, cut: null, res }
+  const effective = Math.max(1, year - 1)
+  const who = yb === yr ? 'both' : yb === year ? 'buy' : 'rent'
+  const s = clone(sc)
+  s.market.horizonYears = effective
+  return { sc: s, cut: { requested: h, effective, who, year }, res }
+}
