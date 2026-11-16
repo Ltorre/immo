@@ -56,7 +56,7 @@ function revive(raw: unknown): AppState | null {
   return {
     lang: r.lang === 'en' || r.lang === 'fr' ? r.lang : base.lang,
     profile: { ...base.profile, ...r.profile, existingPea: { ...base.profile.existingPea, ...r.profile?.existingPea } },
-    rent: { ...base.rent, ...r.rent },
+    rent: { ...base.rent, equivalentYield: null, ...r.rent },
     market: { ...base.market, ...r.market },
     options,
     selectedId,

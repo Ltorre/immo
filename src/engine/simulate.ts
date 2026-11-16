@@ -1,6 +1,11 @@
 import { buildSchedule, rateForYears, type LoanSchedule } from './loan'
 import type { Acquisition, Market, PropertyOption, Scenario, SimResult, YearPoint } from './types'
 
+/** Monthly rent actually used: fixed, or tied to the price of the home being compared. */
+export function effectiveRent(rent: Scenario['rent'], o: PropertyOption): number {
+  return rent.equivalentYield !== null && rent.equivalentYield !== undefined ? (o.price * rent.equivalentYield) / 12 : rent.rentMonthly
+}
+
 export function effectiveRate(o: PropertyOption, m: Market): number {
   return o.rateOverride ?? rateForYears(m.rateTable, o.years)
 }
@@ -196,6 +201,7 @@ export function simulate(sc: Scenario, opts: SimOptions = {}): SimResult {
 export function runSim(prep: Prepared, paths?: Paths): SimResult {
   const { sc, months, acq, loans, debtAt0, creditPay } = prep
   const { profile: p, rent, market: m, option: o } = sc
+  const rentBase = effectiveRent(rent, o)
 
   // --- Growth factors ---
   const feeF = Math.pow(1 - Math.min(Math.max(m.peaFees, 0), 0.5), 1 / 12)
@@ -325,7 +331,7 @@ export function runSim(prep: Prepared, paths?: Paths): SimResult {
     const base = income - living - creditPay[idx]
 
     // Renter housing.
-    const rentPaid = rent.rentMonthly * rentF
+    const rentPaid = rentBase * rentF
     const rentIns = (rent.insuranceAnnual / 12) * chF
     const rentEn = (rent.energyAnnual / 12) * chF
     const rentTotal = rentPaid + rentIns + rentEn

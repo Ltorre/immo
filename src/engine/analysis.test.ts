@@ -20,6 +20,7 @@ describe('break-even solvers', () => {
     const sc = defaultScenario()
     const r = breakEvenRent(sc)
     expect(r.status).toBe('ok')
+    sc.rent.equivalentYield = null
     sc.rent.rentMonthly = r.value!
     expect(Math.abs(diffAt(sc))).toBeLessThan(5)
   })

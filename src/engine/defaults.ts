@@ -56,6 +56,7 @@ export const DEFAULT_PROFILE: Profile = {
 
 export const DEFAULT_RENT: RentPlan = {
   rentMonthly: 1000,
+  equivalentYield: null,
   insuranceAnnual: 150,
   energyAnnual: 1200,
 }

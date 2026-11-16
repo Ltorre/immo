@@ -83,6 +83,7 @@ export function breakEvenRent(sc: Scenario): Solved {
   return bisect(
     (x) => {
       const s = clone(sc)
+      s.rent.equivalentYield = null
       s.rent.rentMonthly = x
       return diffAt(s)
     },

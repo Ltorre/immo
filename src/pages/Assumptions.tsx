@@ -1,6 +1,7 @@
 import { MARKET_SNAPSHOT_DATE, REGIMES } from '../engine/defaults'
 import { Button, Callout, Card, Check, Grid, Num, Pct, Select } from '../ui/fields'
 import { useApp } from '../state'
+import { effectiveRent } from '../engine/simulate'
 
 export default function Assumptions() {
   const { t, fmt, state, update } = useApp()
@@ -11,7 +12,19 @@ export default function Assumptions() {
     <div className="stack">
       <Card title={t('ass.rent')} desc={t('ass.rentDesc')}>
         <Grid>
-          <Num label={t('ass.rentMonthly')} unit="€ / mois" value={r.rentMonthly} step={25} min={0} onChange={(v) => update((d) => { d.rent.rentMonthly = v })} tip={t('ass.rentMonthlyTip')} />
+          <Check
+            label={t('ass.rentLinked')} checked={r.equivalentYield !== null} tip={t('ass.rentLinkedTip')}
+            onChange={(on) => update((d) => { d.rent.equivalentYield = on ? 0.048 : null; if (!on) d.rent.rentMonthly = Math.round(effectiveRent(r, state.options.find((x) => x.id === state.selectedId) ?? state.options[0])) })}
+          />
+          {r.equivalentYield !== null && (
+            <Pct label={t('ass.rentYield')} value={r.equivalentYield} step={0.1} min={0.01} max={0.15} tip={t('ass.rentYieldTip')} onChange={(v) => update((d) => { d.rent.equivalentYield = v })} />
+          )}
+          <Num
+            label={r.equivalentYield !== null ? t('ass.rentDerived') : t('ass.rentMonthly')} unit="€ / mois" step={25} min={0}
+            value={Math.round(effectiveRent(r, state.options.find((x) => x.id === state.selectedId) ?? state.options[0]))}
+            disabled={r.equivalentYield !== null} tip={t('ass.rentMonthlyTip')}
+            onChange={(v) => update((d) => { d.rent.rentMonthly = v })}
+          />
           <Num label={t('ass.rentIns')} unit="€ / an" value={r.insuranceAnnual} step={10} min={0} onChange={(v) => update((d) => { d.rent.insuranceAnnual = v })} />
           <Num label={t('ass.rentEnergy')} unit="€ / an" value={r.energyAnnual} step={100} min={0} onChange={(v) => update((d) => { d.rent.energyAnnual = v })} />
           <Pct label={t('ass.rentGrowth')} value={m.rentGrowth} step={0.1} min={-0.05} max={0.1} onChange={(v) => update((d) => { d.market.rentGrowth = v })} tip={t('ass.rentGrowthTip')} />

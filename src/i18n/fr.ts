@@ -191,9 +191,9 @@ export const fr = {
 
   // ---------- Assumptions ----------
   'ass.rent': 'Si je reste locataire',
-  'ass.rentDesc': 'Le loyer d’un logement équivalent à celui que vous achèteriez, pas forcément votre loyer actuel.',
+  'ass.rentDesc': 'Votre alternative à l’achat : en général votre loyer actuel, si vous restez où vous êtes.',
   'ass.rentMonthly': 'Loyer mensuel',
-  'ass.rentMonthlyTip': 'Charges comprises. Pour un bien équivalent : un loyer annuel autour de 4 à 5 % du prix d’achat est courant.',
+  'ass.rentMonthlyTip': 'Charges comprises. Votre loyer actuel, ou celui d’un logement que vous loueriez à la place.',
   'ass.rentIns': 'Assurance locataire',
   'ass.rentEnergy': 'Énergie et eau (si pas dans le loyer)',
   'ass.rentGrowth': 'Hausse annuelle du loyer',
@@ -402,6 +402,14 @@ export const fr = {
   'risk.table': 'Distribution du patrimoine final (euros d’aujourd’hui)',
   'risk.ruin': 'Dans {buyer} % des simulations (achat) et {renter} % (location), la trésorerie du foyer passe en négatif.',
   'risk.note': 'Les rendements sont tirés selon une loi log-normale dont la moyenne est celle que vous avez choisie ; l’histoire récente peut sortir de ce cadre (krachs, longues périodes sans hausse).',
+
+  'ass.rentLinked': 'Comparer plutôt à un logement équivalent au bien acheté',
+  'ass.rentLinkedTip': 'Par défaut le loyer est fixe : c’est votre loyer actuel, quel que soit le prix du bien. Cochez pour un comparatif à confort égal : le loyer suit alors le prix de chaque bien (prix × rendement locatif ÷ 12).',
+  'ass.rentYield': 'Rendement locatif brut du bien équivalent',
+  'ass.rentYieldTip': 'Loyer annuel ÷ prix du bien. Autour de 3,5 à 5 % dans la plupart des villes, plus élevé dans les petites surfaces et les villes moyennes.',
+  'ass.rentDerived': 'Loyer mensuel équivalent (calculé)',
+  'warn.rentHigh': 'Votre loyer annuel représente {ratio} du prix du bien (3,5 à 5 % est courant pour un logement équivalent). C’est normal si vous comparez à votre logement actuel, mais si le bien acheté est plus petit ou moins cher, vous ne comparez pas le même confort : l’achat est avantagé. Pour comparer à confort égal, cochez l’option dans Hypothèses.',
+  'warn.rentLow': 'Votre loyer annuel ne représente que {ratio} du prix du bien. C’est normal si vous comparez à votre logement actuel, mais si le bien acheté est plus grand ou plus cher, vous ne comparez pas le même confort : la location est avantagée. Pour comparer à confort égal, cochez l’option dans Hypothèses.',
 
   // ---------- Feasibility ----------
   'feas.intro': 'Une banque regarde d’abord votre taux d’endettement, puis votre apport. Voici ce qu’elle verrait pour le bien sélectionné.',

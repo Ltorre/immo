@@ -40,8 +40,14 @@ export interface Profile {
 }
 
 export interface RentPlan {
-  /** Monthly rent, charges included. */
+  /** Monthly rent, charges included. Ignored when `equivalentYield` is set. */
   rentMonthly: number
+  /**
+   * null (default) = `rentMonthly` is the household's own alternative, typically the current rent.
+   * When set, the comparison is made against a home equivalent to the one bought instead: price × gross rental yield ÷ 12,
+   * so the rent follows the price of each candidate home.
+   */
+  equivalentYield: number | null
   /** Tenant home insurance per year. */
   insuranceAnnual: number
   /** Energy / water bills per year when renting. */

@@ -193,9 +193,9 @@ export const en: Record<Key, string> = {
 
   // ---------- Assumptions ----------
   'ass.rent': 'If I stay a tenant',
-  'ass.rentDesc': 'The rent of a home equivalent to the one you would buy, not necessarily your current rent.',
+  'ass.rentDesc': 'Your alternative to buying: usually your current rent, if you stay where you are.',
   'ass.rentMonthly': 'Monthly rent',
-  'ass.rentMonthlyTip': 'Charges included. For an equivalent home a yearly rent around 4–5 % of the purchase price is common.',
+  'ass.rentMonthlyTip': 'Charges included. Your current rent, or that of a home you would rent instead.',
   'ass.rentIns': 'Tenant insurance',
   'ass.rentEnergy': 'Energy and water (if not in the rent)',
   'ass.rentGrowth': 'Yearly rent increase',
@@ -404,6 +404,14 @@ export const en: Record<Key, string> = {
   'risk.table': 'Distribution of final net worth (today’s euros)',
   'risk.ruin': 'In {buyer} % of simulations (buying) and {renter} % (renting), the household’s cash goes negative.',
   'risk.note': 'Returns are drawn from a log-normal law whose mean is the one you chose; recent history can fall outside this frame (crashes, long periods without gains).',
+
+  'ass.rentLinked': 'Compare with a home equivalent to the one bought instead',
+  'ass.rentLinkedTip': 'By default the rent is fixed: it is your current rent, whatever the price of the home. Tick for a like-for-like comparison: the rent then follows the price of each home (price × rental yield ÷ 12).',
+  'ass.rentYield': 'Gross rental yield of the equivalent home',
+  'ass.rentYieldTip': 'Yearly rent ÷ home price. Around 3.5 to 5 % in most cities, higher for small flats and mid-sized towns.',
+  'ass.rentDerived': 'Equivalent monthly rent (calculated)',
+  'warn.rentHigh': 'Your yearly rent is {ratio} of the home’s price (3.5 to 5 % is common for an equivalent home). That is fine if you compare with your current home, but if the home you would buy is smaller or cheaper you are not comparing the same comfort: buying is favoured. For a like-for-like comparison, tick the option in Assumptions.',
+  'warn.rentLow': 'Your yearly rent is only {ratio} of the home’s price. That is fine if you compare with your current home, but if the home you would buy is bigger or pricier you are not comparing the same comfort: renting is favoured. For a like-for-like comparison, tick the option in Assumptions.',
 
   // ---------- Feasibility ----------
   'feas.intro': 'A bank looks at your debt ratio first, then your down payment. Here is what it would see for the selected home.',

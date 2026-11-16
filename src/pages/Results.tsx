@@ -1,4 +1,5 @@
 import { HCSF_MAX_DEBT_RATIO, HCSF_MAX_YEARS, HCSF_MAX_YEARS_WORKS } from '../engine/defaults'
+import { effectiveRent } from '../engine/simulate'
 import { Callout, Card, Stat } from '../ui/fields'
 import { LineChart } from '../ui/charts'
 import CutNotice from '../ui/CutNotice'
@@ -27,6 +28,9 @@ export default function Results({ go }: { go: (tab: string) => void }) {
   if (dc.ratio > HCSF_MAX_DEBT_RATIO + 1e-9) warnings.push({ kind: 'warn', text: t('warn.ratio', { ratio: fmt.pct(dc.ratio), max: fmt.pct(HCSF_MAX_DEBT_RATIO, 0) }) })
   if (option.years > maxYears) warnings.push({ kind: 'warn', text: t('warn.duration', { years: option.years, max: maxYears }) })
   if (a.downPayment < a.notary + a.agency) warnings.push({ kind: 'warn', text: t('warn.apport', { fees: fmt.eur(a.notary + a.agency) }) })
+  const rentYield = option.price > 0 ? (effectiveRent(sc.rent, option) * 12) / option.price : 0
+  if (sc.rent.equivalentYield === null && rentYield > 0.055) warnings.push({ kind: 'info', text: t('warn.rentHigh', { ratio: fmt.pct(rentYield) }) })
+  if (sc.rent.equivalentYield === null && rentYield > 0 && rentYield < 0.03) warnings.push({ kind: 'info', text: t('warn.rentLow', { ratio: fmt.pct(rentYield) }) })
   if (horizon < 5) warnings.push({ kind: 'warn', text: t('warn.short') })
   if (pt.deficitMonthsRenter > 0) warnings.push({ kind: 'warn', text: t('warn.deficitRent', { months: pt.deficitMonthsRenter, year: Math.floor((pt.firstDeficitMonthRenter - 1) / 12) + 1 }) })
   if (pt.renterCto > 0 && sc.market.overflow === 'cto') warnings.push({ kind: 'info', text: t('info.cap', { cap: fmt.eur(sc.market.peaCap) }) })
@@ -104,7 +108,7 @@ export default function Results({ go }: { go: (tab: string) => void }) {
           <Stat
             label={t('be.rent')}
             value={solvedText(be.rent, (v) => fmt.eur(v), t('be.alwaysBuy'), t('be.neverBuy'))}
-            sub={t('be.rentSub', { current: fmt.eur(sc.rent.rentMonthly) })}
+            sub={t('be.rentSub', { current: fmt.eur(effectiveRent(sc.rent, option)) })}
           />
           <Stat
             label={t('be.pea')}

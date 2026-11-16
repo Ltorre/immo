@@ -13,6 +13,7 @@ function flat(): Scenario {
     psRate: 0, pfuRate: 0, liquidateAtHorizon: false, horizonYears: 10,
   }
   sc.profile.incomeGrowth = 0
+  sc.rent.equivalentYield = null // fixed rent: the books are balanced by hand
   sc.option = { ...newOption('flat'), rateOverride: 0.03, years: 20, maintenancePct: 0, guaranteeRefundPct: 0 }
   return sc
 }
@@ -124,10 +125,11 @@ describe('simulation books', () => {
 
   it('a higher appreciation helps the buyer, a higher rent helps the buyer, a higher PEA return helps the renter', () => {
     const base = defaultScenario()
+    base.rent.equivalentYield = null; base.rent.rentMonthly = 1000
     const d = (s: Scenario) => atHorizon(simulate(s), s.market.horizonYears).diff
     const ref = d(base)
     const a = structuredClone(base); a.market.homeAppreciation += 0.02
-    const r = structuredClone(base); r.rent.rentMonthly += 300
+    const r = structuredClone(base); r.rent.equivalentYield = null; r.rent.rentMonthly = 1300
     const e = structuredClone(base); e.market.peaReturn += 0.02
     expect(d(a)).toBeGreaterThan(ref)
     expect(d(r)).toBeGreaterThan(ref)
@@ -166,6 +168,7 @@ describe('PEA rules', () => {
     sc.profile.netIncomeMonthly = 3200
     sc.profile.livingExpensesMonthly = 3000 // nothing left to invest
     sc.profile.incomeTaxMonthly = 200
+    sc.rent.equivalentYield = null
     sc.rent.rentMonthly = 0
     sc.rent.insuranceAnnual = 0
     sc.rent.energyAnnual = 0
@@ -208,6 +211,7 @@ describe('deficit warnings', () => {
     sc.profile.incomeTaxMonthly = 350
     sc.profile.incomeGrowth = 0 // flat pay while spending follows inflation
     sc.profile.livingExpensesMonthly = 1500
+    sc.rent.equivalentYield = null
     sc.rent.rentMonthly = 1640
     sc.market.rentGrowth = 0.015
     const res = simulate(sc, { months: 480 })
@@ -226,7 +230,7 @@ describe('insolvency cut', () => {
     const sc = defaultScenario()
     Object.assign(sc.profile, { netIncomeMonthly: 5300, incomeTaxMonthly: 350, incomeGrowth: 0.01, livingExpensesMonthly: 2800, savings: 76000, emergencyFund: 25000, existingPea: { value: 8790, deposits: 7200, ageYears: 2 } })
     Object.assign(sc.option, { price: 335000, downPayment: 40000, years: 25, rateOverride: 0.0385 })
-    Object.assign(sc.rent, { rentMonthly: 1640, insuranceAnnual: 280, energyAnnual: 1200 })
+    Object.assign(sc.rent, { equivalentYield: null, rentMonthly: 1640, insuranceAnnual: 280, energyAnnual: 1200 })
     Object.assign(sc.market, { peaReturn: 0.04, homeAppreciation: 0.01, rentGrowth: 0.015, horizonYears: 20 })
     const { sc: cutSc, cut } = cutScenario(sc)
     expect(cut).not.toBeNull()
@@ -243,5 +247,21 @@ describe('insolvency cut', () => {
     const { cutScenario } = await import('./analysis')
     const { cut } = cutScenario(defaultScenario())
     expect(cut).toBeNull()
+  })
+})
+
+describe('rent tied to the price', () => {
+  it('follows the price of the home when an equivalent yield is set', () => {
+    const a = defaultScenario(); a.rent.equivalentYield = 0.048; a.option.price = 250_000
+    const b = structuredClone(a); b.option.price = 500_000
+    const ra = simulate(a), rb = simulate(b)
+    // 250 000 × 4.8 % / 12 = 1 000 € rent (+ insurance and energy), twice that for twice the price
+    expect(ra.year1.rentHousingCash).toBeCloseTo(1000 + (a.rent.insuranceAnnual + a.rent.energyAnnual) / 12, 6)
+    expect(rb.year1.rentHousingCash).toBeCloseTo(2000 + (b.rent.insuranceAnnual + b.rent.energyAnnual) / 12, 6)
+  })
+
+  it('keeps the fixed rent when no yield is set', () => {
+    const a = defaultScenario(); a.rent.equivalentYield = null; a.rent.rentMonthly = 1640; a.option.price = 150_000
+    expect(simulate(a).year1.rentHousingCash).toBeCloseTo(1640 + (a.rent.insuranceAnnual + a.rent.energyAnnual) / 12, 6)
   })
 })
