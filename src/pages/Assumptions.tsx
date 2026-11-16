@@ -3,7 +3,7 @@ import { Button, Callout, Card, Check, Grid, Num, Pct, Select } from '../ui/fiel
 import { useApp } from '../state'
 
 export default function Assumptions() {
-  const { t, state, update } = useApp()
+  const { t, fmt, state, update } = useApp()
   const m = state.market
   const r = state.rent
 
@@ -58,7 +58,7 @@ export default function Assumptions() {
       </Card>
 
       <Card
-        title={t('ass.rates')} desc={t('ass.ratesDesc', { date: MARKET_SNAPSHOT_DATE })}
+        title={t('ass.rates')} desc={t('ass.ratesDesc', { date: fmt.month(MARKET_SNAPSHOT_DATE) })}
         actions={<Button onClick={() => update((d) => { d.market.rateTable.push({ years: 30, rate: 0.04 }) })}>{t('common.add')}</Button>}
       >
         <div className="stack tight">

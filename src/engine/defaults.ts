@@ -64,8 +64,63 @@ export function newCredit(): ExistingCredit {
   return { id: uid('credit'), label: '', monthlyPayment: 200, remainingMonths: 36 }
 }
 
-export function newExtraLoan(): ExtraLoan {
-  return { id: uid('loan'), label: 'PTZ', amount: 30_000, rate: 0, years: 20, insurancePct: 0.0025, deferralMonths: 60 }
+export type AidId = 'ptz' | 'actionLogement' | 'pel' | 'ecoPtz' | 'custom'
+
+export interface AidTemplate {
+  id: AidId
+  defaults: Omit<ExtraLoan, 'id' | 'template'>
+  /** Where the conditions come from. `official` = a public or institutional page. */
+  source?: { url: string; official: boolean }
+  /** Month the conditions were last checked. */
+  checked: string
+  /** `confirmed` = consistent official source; `check` = sources disagree or are secondary. */
+  confidence: 'confirmed' | 'check'
+}
+
+/**
+ * Loans that can be added with sensible defaults. Figures are indicative (November 2026) and must be
+ * confirmed with the lender: the texts shown in the UI live in the i18n dictionaries (`aid.<id>.*`).
+ */
+export const AID_TEMPLATES: AidTemplate[] = [
+  {
+    id: 'ptz',
+    defaults: { label: 'PTZ', amount: 30_000, rate: 0, years: 20, insurancePct: 0.0025, deferralMonths: 60 },
+    source: { url: 'https://www.economie.gouv.fr/particuliers/emprunter-et-sassurer/pret-taux-zero-ptz-tout-ce-quil-faut-savoir', official: true },
+    checked: '2026-11',
+    confidence: 'check',
+  },
+  {
+    id: 'actionLogement',
+    defaults: { label: 'Action Logement', amount: 40_000, rate: 0.005, years: 25, insurancePct: 0.003, deferralMonths: 0 },
+    source: { url: 'https://www.actionlogement.fr/le-pret-accession', official: true },
+    checked: '2026-11',
+    confidence: 'check',
+  },
+  {
+    id: 'pel',
+    defaults: { label: 'PEL', amount: 40_000, rate: 0.032, years: 15, insurancePct: 0.003, deferralMonths: 0 },
+    source: { url: 'https://www.service-public.gouv.fr/particuliers/actualites/A16217?lang=fr', official: true },
+    checked: '2026-11',
+    confidence: 'confirmed',
+  },
+  {
+    id: 'ecoPtz',
+    defaults: { label: 'Éco-PTZ', amount: 30_000, rate: 0, years: 15, insurancePct: 0, deferralMonths: 0 },
+    source: { url: 'https://finalib.fr/blog/credit-financement/eco-ptz-2026-conditions-montant-travaux', official: false },
+    checked: '2026-11',
+    confidence: 'check',
+  },
+  {
+    id: 'custom',
+    defaults: { label: '', amount: 20_000, rate: 0.01, years: 10, insurancePct: 0, deferralMonths: 0 },
+    checked: '2026-11',
+    confidence: 'confirmed',
+  },
+]
+
+export function newExtraLoan(template: AidId = 'ptz'): ExtraLoan {
+  const t = AID_TEMPLATES.find((x) => x.id === template) ?? AID_TEMPLATES[0]
+  return { id: uid('loan'), template: t.id, ...t.defaults }
 }
 
 export function newOneOff(): OneOff {

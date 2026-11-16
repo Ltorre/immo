@@ -115,6 +115,11 @@ function makeFmt(lang: Lang) {
     num: (n: number) => numF.format(n),
     pct: (x: number, digits = 1) =>
       `${(x * 100).toLocaleString(locale, { minimumFractionDigits: digits, maximumFractionDigits: digits })} %`.replace(' %', lang === 'fr' ? ' %' : '%'),
+    /** "2026-11" → "novembre 2026". */
+    month: (ym: string) => {
+      const [y, m] = ym.split('-').map(Number)
+      return new Date(y, m - 1, 1).toLocaleDateString(locale, { month: 'long', year: 'numeric' })
+    },
     yrs: (n: number, digits = 1) => n.toLocaleString(locale, { minimumFractionDigits: 0, maximumFractionDigits: digits }),
   }
 }

@@ -1,9 +1,10 @@
-import { NOTARY_PCT, newExtraLoan, newOneOff, newOption, uid } from '../engine/defaults'
+import { AID_TEMPLATES, NOTARY_PCT, newExtraLoan, newOneOff, newOption, uid, type AidId } from '../engine/defaults'
 import { buildSchedule, totalCost } from '../engine/loan'
 import type { PropertyOption } from '../engine/types'
 import { Button, Callout, Card, Check, Grid, Num, Pct, Select, Text } from '../ui/fields'
 import { useMain } from '../hooks'
 import { useApp } from '../state'
+import { AidInfo, OtherAids } from '../ui/AidInfo'
 
 export default function Property() {
   const { t, fmt, state, update, option: o } = useApp()
@@ -106,14 +107,20 @@ export default function Property() {
             </div>
           </Card>
 
-          <Card
-            title={t('prop.extraLoans')} desc={t('prop.extraLoansDesc')}
-            actions={<Button onClick={() => set((x) => { x.extraLoans.push(newExtraLoan()) })}>{t('common.add')}</Button>}
-          >
+          <Card title={t('prop.extraLoans')} desc={t('prop.extraLoansDesc')}>
+            <div className="presets">
+              <span className="muted small">{t('aid.add')}</span>
+              {AID_TEMPLATES.map((a) => (
+                <Button key={a.id} kind="ghost" onClick={() => set((x) => { x.extraLoans.push(newExtraLoan(a.id)) })}>
+                  + {t(`aid.${a.id}.name` as 'aid.ptz.name')}
+                </Button>
+              ))}
+            </div>
             {o.extraLoans.length === 0 && <p className="muted">{t('prop.noExtraLoans')}</p>}
             <div className="stack tight">
               {o.extraLoans.map((l, i) => (
-                <div className="row-card" key={l.id}>
+                <div key={l.id} className="stack tight">
+                <div className="row-card">
                   <Grid min={140}>
                     <Text label={t('prop.loanLabel')} value={l.label} onChange={(v) => set((x) => { x.extraLoans[i].label = v })} />
                     <Num label={t('prop.loanAmount')} unit="€" value={l.amount} step={1000} min={0} onChange={(v) => set((x) => { x.extraLoans[i].amount = v })} />
@@ -124,9 +131,13 @@ export default function Property() {
                   </Grid>
                   <Button kind="ghost" onClick={() => set((x) => { x.extraLoans.splice(i, 1) })}>{t('common.remove')}</Button>
                 </div>
+                <AidInfo id={(l.template ?? 'custom') as AidId} />
+                </div>
               ))}
             </div>
           </Card>
+
+          <OtherAids />
 
           <Card title={t('prop.running')} desc={t('prop.runningDesc')}>
             <Grid>

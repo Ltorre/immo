@@ -11,7 +11,7 @@ const SOURCES = [
 ] as const
 
 export default function About() {
-  const { state } = useApp()
+  const { state, fmt } = useApp()
   return (
     <div className="stack prose">
       {state.lang === 'fr' ? <Fr /> : <En />}
@@ -23,8 +23,8 @@ export default function About() {
         </ul>
         <p className="muted small">
           {state.lang === 'fr'
-            ? `Valeurs de marché relevées en ${MARKET_SNAPSHOT_DATE}. Elles évoluent : toutes sont modifiables dans l’onglet Hypothèses.`
-            : `Market values collected in ${MARKET_SNAPSHOT_DATE}. They move: all of them can be edited in the Assumptions tab.`}
+            ? `Valeurs de marché relevées en ${fmt.month(MARKET_SNAPSHOT_DATE)}. Elles évoluent : toutes sont modifiables dans l’onglet Hypothèses.`
+            : `Market values collected in ${fmt.month(MARKET_SNAPSHOT_DATE)}. They move: all of them can be edited in the Assumptions tab.`}
         </p>
       </Card>
     </div>

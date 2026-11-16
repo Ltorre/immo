@@ -88,6 +88,8 @@ export interface Market {
 
 export interface ExtraLoan {
   id: string
+  /** Catalogue entry this loan was created from (drives the "conditions" panel), if any. */
+  template?: string
   label: string
   amount: number
   rate: number
