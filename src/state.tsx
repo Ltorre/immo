@@ -20,6 +20,9 @@ export interface AppState {
 
 const STORAGE_KEY = 'immo:v1'
 const THEME_KEY = 'immo:theme'
+const LAYOUT_KEY = 'immo:layout'
+
+export type Layout = 'top' | 'side'
 
 export function detectLang(): Lang {
   try {
@@ -140,6 +143,9 @@ interface Ctx {
   shareLink: () => string
   theme: 'auto' | 'light' | 'dark'
   cycleTheme: () => void
+  /** Navigation style: tabs in a top bar, or a left sidebar. Remembered on this device only. */
+  layout: Layout
+  toggleLayout: () => void
 }
 
 const AppCtx = createContext<Ctx | null>(null)
@@ -154,6 +160,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return 'auto'
     }
   })
+
+  const [layout, setLayout] = useState<Layout>(() => {
+    try {
+      return localStorage.getItem(LAYOUT_KEY) === 'side' ? 'side' : 'top'
+    } catch {
+      return 'top'
+    }
+  })
+  useEffect(() => {
+    try { localStorage.setItem(LAYOUT_KEY, layout) } catch { /* ignore */ }
+  }, [layout])
 
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)) } catch { /* ignore */ }
@@ -200,8 +217,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       shareLink: () => `${window.location.origin}${window.location.pathname}#s=${encodeShare(state)}`,
       theme,
       cycleTheme: () => setTheme((x) => (x === 'auto' ? 'light' : x === 'light' ? 'dark' : 'auto')),
+      layout,
+      toggleLayout: () => setLayout((x) => (x === 'top' ? 'side' : 'top')),
     }
-  }, [state, update, reset, theme])
+  }, [state, update, reset, theme, layout])
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>
 }

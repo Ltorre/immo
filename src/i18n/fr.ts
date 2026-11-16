@@ -27,6 +27,13 @@ export const fr = {
   'nav.compare': 'Comparer',
   'nav.risk': 'Risques',
   'nav.feasibility': 'Faisabilité',
+  'nav.groupInput': 'Mon dossier',
+  'nav.groupAnalysis': 'Analyse',
+  'menu.more': 'Plus d’options',
+  'menu.layout': 'Affichage : {mode}',
+  'menu.layoutTop': 'barre du haut',
+  'menu.layoutSide': 'menu latéral',
+  'menu.switchTo': 'Passer en {mode}',
   'nav.about': 'Méthode & limites',
 
   'intro.text': 'Ce simulateur compare deux vies : acheter votre résidence principale, ou rester locataire et placer la différence dans un PEA. Les valeurs ci-dessous sont des exemples.',

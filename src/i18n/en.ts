@@ -29,6 +29,13 @@ export const en: Record<Key, string> = {
   'nav.compare': 'Compare',
   'nav.risk': 'Risk',
   'nav.feasibility': 'Feasibility',
+  'nav.groupInput': 'My file',
+  'nav.groupAnalysis': 'Analysis',
+  'menu.more': 'More options',
+  'menu.layout': 'Layout: {mode}',
+  'menu.layoutTop': 'top bar',
+  'menu.layoutSide': 'sidebar',
+  'menu.switchTo': 'Switch to {mode}',
   'nav.about': 'Method & limits',
 
   'intro.text': 'This simulator compares two lives: buying your main home, or staying a tenant and investing the difference in a PEA. The values below are samples.',
