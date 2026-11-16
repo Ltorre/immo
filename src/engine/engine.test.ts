@@ -200,3 +200,22 @@ describe('PEA rules', () => {
     expect(res.years[0].buyerPea).toBeCloseTo(60_000 - gross, 3)
   })
 })
+
+describe('deficit warnings', () => {
+  it('only count months up to the comparison date, not the whole 40-year run', () => {
+    const sc = defaultScenario()
+    sc.profile.netIncomeMonthly = 5300
+    sc.profile.incomeTaxMonthly = 350
+    sc.profile.incomeGrowth = 0 // flat pay while spending follows inflation
+    sc.profile.livingExpensesMonthly = 1500
+    sc.rent.rentMonthly = 1640
+    sc.market.rentGrowth = 0.015
+    const res = simulate(sc, { months: 480 })
+    expect(res.deficitMonthsRenter).toBeGreaterThan(0) // the whole run does run dry eventually
+    const at20 = atHorizon(res, 20)
+    expect(at20.deficitMonthsRenter).toBe(0) // but not within a 20-year comparison
+    const last = res.years[res.years.length - 1]
+    expect(last.deficitMonthsRenter).toBe(res.deficitMonthsRenter)
+    expect(Math.floor((last.firstDeficitMonthRenter - 1) / 12) + 1).toBeGreaterThan(20)
+  })
+})

@@ -22,12 +22,12 @@ export default function Results({ go }: { go: (tab: string) => void }) {
   const maxYears = option.kind === 'new' || option.worksInitial > 0 ? HCSF_MAX_YEARS_WORKS : HCSF_MAX_YEARS
   const warnings: { kind: 'warn' | 'bad' | 'info'; text: string }[] = []
   if (res.downPaymentShortfall > 0) warnings.push({ kind: 'bad', text: t('warn.shortfall', { amount: fmt.eur(res.downPaymentShortfall) }) })
-  if (res.deficitMonthsBuyer > 0) warnings.push({ kind: 'bad', text: t('warn.deficit', { months: res.deficitMonthsBuyer, min: fmt.eur(Math.min(0, res.minCashBuyer)) }) })
+  if (pt.deficitMonthsBuyer > 0) warnings.push({ kind: 'bad', text: t('warn.deficit', { months: pt.deficitMonthsBuyer, year: Math.floor((pt.firstDeficitMonthBuyer - 1) / 12) + 1, min: fmt.eur(Math.min(0, pt.minCashBuyer)) }) })
   if (dc.ratio > HCSF_MAX_DEBT_RATIO + 1e-9) warnings.push({ kind: 'warn', text: t('warn.ratio', { ratio: fmt.pct(dc.ratio), max: fmt.pct(HCSF_MAX_DEBT_RATIO, 0) }) })
   if (option.years > maxYears) warnings.push({ kind: 'warn', text: t('warn.duration', { years: option.years, max: maxYears }) })
   if (a.downPayment < a.notary + a.agency) warnings.push({ kind: 'warn', text: t('warn.apport', { fees: fmt.eur(a.notary + a.agency) }) })
   if (horizon < 5) warnings.push({ kind: 'warn', text: t('warn.short') })
-  if (res.deficitMonthsRenter > 0) warnings.push({ kind: 'warn', text: t('warn.deficitRent', { months: res.deficitMonthsRenter }) })
+  if (pt.deficitMonthsRenter > 0) warnings.push({ kind: 'warn', text: t('warn.deficitRent', { months: pt.deficitMonthsRenter, year: Math.floor((pt.firstDeficitMonthRenter - 1) / 12) + 1 }) })
   if (pt.renterCto > 0 && sc.market.overflow === 'cto') warnings.push({ kind: 'info', text: t('info.cap', { cap: fmt.eur(sc.market.peaCap) }) })
 
   // ---- chart data ----

@@ -204,6 +204,14 @@ export interface YearPoint {
   sellCosts: number
   ira: number
   refund: number
+  /** Months (up to this date) in which the household had to dip into savings, and the first such month (1-based, 0 = never). */
+  deficitMonthsBuyer: number
+  deficitMonthsRenter: number
+  firstDeficitMonthBuyer: number
+  firstDeficitMonthRenter: number
+  /** Lowest cash balance seen up to this date. */
+  minCashBuyer: number
+  minCashRenter: number
   /** Taxes that liquidating the investment accounts would trigger. */
   buyerTaxes: number
   renterTaxes: number

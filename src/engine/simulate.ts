@@ -235,6 +235,7 @@ export function runSim(prep: Prepared, paths?: Paths): SimResult {
   let homeValue = acq.initialValue
   let incomeF = 1, exprF = 1, chF = 1, rentF = 1
   let deficitB = 0, deficitR = 0
+  let firstB = 0, firstR = 0
   let minCashB = buyer.livret, minCashR = renter.livret
   const cumB = zeroCum()
   const cumR = { rent: 0, rentInsurance: 0, rentEnergy: 0 }
@@ -283,6 +284,12 @@ export function runSim(prep: Prepared, paths?: Paths): SimResult {
       renterPea: renter.peaValue,
       renterCto: renter.ctoValue,
       renterLivret: renter.livret,
+      deficitMonthsBuyer: deficitB,
+      deficitMonthsRenter: deficitR,
+      firstDeficitMonthBuyer: firstB,
+      firstDeficitMonthRenter: firstR,
+      minCashBuyer: minCashB,
+      minCashRenter: minCashR,
       sellCosts: sell,
       ira,
       refund,
@@ -346,9 +353,9 @@ export function runSim(prep: Prepared, paths?: Paths): SimResult {
     const surR = base - rentTotal
     const ptax = peaTaxAt(peaAgeMonths0 + idx + 1)
     if (surB >= 0) buyer.invest(surB, m.peaCap, m.overflow)
-    else { buyer.cover(-surB, ptax, m.pfuRate); deficitB++ }
+    else { buyer.cover(-surB, ptax, m.pfuRate); deficitB++; if (!firstB) firstB = idx + 1 }
     if (surR >= 0) renter.invest(surR, m.peaCap, m.overflow)
-    else { renter.cover(-surR, ptax, m.pfuRate); deficitR++ }
+    else { renter.cover(-surR, ptax, m.pfuRate); deficitR++; if (!firstR) firstR = idx + 1 }
     if (buyer.livret < minCashB) minCashB = buyer.livret
     if (renter.livret < minCashR) minCashR = renter.livret
 
