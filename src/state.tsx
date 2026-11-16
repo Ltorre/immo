@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { DEFAULT_MARKET, DEFAULT_PROFILE, DEFAULT_RENT, newOption } from './engine/defaults'
 import { DEFAULT_MC, type McParams } from './engine/montecarlo'
+import { DEFAULT_PTZ, type PtzInputs } from './engine/ptz'
 import type { Lang, Market, Profile, PropertyOption, RentPlan, Scenario } from './engine/types'
 import { dictionaries, type Key } from './i18n'
 
@@ -14,6 +15,7 @@ export interface AppState {
   /** Show amounts in today's euros (inflation removed). */
   real: boolean
   mc: McParams
+  ptz: PtzInputs
 }
 
 const STORAGE_KEY = 'immo:v1'
@@ -38,6 +40,7 @@ export function initialState(): AppState {
     selectedId: opt.id,
     real: true,
     mc: { ...DEFAULT_MC },
+    ptz: { ...DEFAULT_PTZ },
   }
 }
 
@@ -59,6 +62,7 @@ function revive(raw: unknown): AppState | null {
     selectedId,
     real: typeof r.real === 'boolean' ? r.real : base.real,
     mc: { ...base.mc, ...r.mc },
+    ptz: { ...base.ptz, ...r.ptz },
   }
 }
 

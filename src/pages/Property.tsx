@@ -5,6 +5,7 @@ import { Button, Callout, Card, Check, Grid, Num, Pct, Select, Text } from '../u
 import { useMain } from '../hooks'
 import { useApp } from '../state'
 import { AidInfo, OtherAids } from '../ui/AidInfo'
+import PtzTester from '../ui/PtzTester'
 
 export default function Property() {
   const { t, fmt, state, update, option: o } = useApp()
@@ -136,6 +137,8 @@ export default function Property() {
               ))}
             </div>
           </Card>
+
+          <PtzTester />
 
           <OtherAids />
 
