@@ -1,0 +1,27 @@
+# Runs the site behind the EXISTING nginx container (docker network "nginx-proxy-network").
+# No published port: only the proxy can reach it. Public site, no allowlist.
+#
+#   docker compose up -d
+services:
+  immo:
+    image: ${IMMO_IMAGE:-immo:prod}
+    container_name: immo
+    restart: unless-stopped
+    networks: [nginx-proxy-network]
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    pids_limit: 128
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  nginx-proxy-network:
+    external: true
