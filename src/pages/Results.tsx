@@ -8,7 +8,7 @@ import { useApp } from '../state'
 import type { Solved } from '../engine/analysis'
 
 export default function Results({ go }: { go: (tab: string) => void }) {
-  const { t, fmt, state, option } = useApp()
+  const { t, fmt, state, option, rentName } = useApp()
   const { sc, res, horizon, pt, dc, adj, cut } = useMain()
   const be = useBreakEvens()
   const a = res.acquisition
@@ -33,7 +33,7 @@ export default function Results({ go }: { go: (tab: string) => void }) {
   if (sc.rent.equivalentYield === null && rentYield > 0 && rentYield < 0.03) warnings.push({ kind: 'info', text: t('warn.rentLow', { ratio: fmt.pct(rentYield) }) })
   if (horizon < 5) warnings.push({ kind: 'warn', text: t('warn.short') })
   if (pt.deficitMonthsRenter > 0) warnings.push({ kind: 'warn', text: t('warn.deficitRent', { months: pt.deficitMonthsRenter, year: Math.floor((pt.firstDeficitMonthRenter - 1) / 12) + 1 }) })
-  if (pt.renterCto > 0 && sc.market.overflow === 'cto') warnings.push({ kind: 'info', text: t('info.cap', { cap: fmt.eur(sc.market.peaCap) }) })
+  if (sc.market.vehicle !== 'savings' && pt.renterCto > 0 && sc.market.overflow === 'cto') warnings.push({ kind: 'info', text: t('info.cap', { cap: fmt.eur(sc.market.peaCap) }) })
 
   // ---- chart data ----
   const lastYear = Math.min(res.years.length - 1, horizon + 10)
@@ -111,9 +111,11 @@ export default function Results({ go }: { go: (tab: string) => void }) {
             sub={t('be.rentSub', { current: fmt.eur(effectiveRent(sc.rent, option)) })}
           />
           <Stat
-            label={t('be.pea')}
+            label={sc.market.vehicle === 'savings' ? t('be.savings') : t('be.pea')}
             value={solvedText(be.pea, (v) => fmt.pct(v), t('be.alwaysBuy'), t('be.neverBuy'))}
-            sub={t('be.peaSub', { current: fmt.pct(sc.market.peaReturn) })}
+            sub={sc.market.vehicle === 'savings'
+              ? t('be.savingsSub', { current: fmt.pct(sc.market.savingsKind === 'current' ? 0 : sc.market.savingsGross) })
+              : t('be.peaSub', { current: fmt.pct(sc.market.peaReturn) })}
           />
         </div>
       </Card>
@@ -139,7 +141,7 @@ export default function Results({ go }: { go: (tab: string) => void }) {
           ariaLabel={t('chart.netWorth')}
           series={[
             { id: 'buy', name: t('series.buy'), tone: 'buy', points: buyerSeries },
-            { id: 'rent', name: t('series.rent'), tone: 'rent', points: renterSeries },
+            { id: 'rent', name: rentName, tone: 'rent', points: renterSeries },
           ]}
           yFormat={fmt.eurShort}
           xFormat={yearFmt}
@@ -164,7 +166,7 @@ export default function Results({ go }: { go: (tab: string) => void }) {
         <div className="table-wrap">
           <table className="table">
             <thead>
-              <tr><th /><th className="num"><span className="swatch buy" /> {t('series.buy')}</th><th className="num"><span className="swatch rent" /> {t('series.rent')}</th></tr>
+              <tr><th /><th className="num"><span className="swatch buy" /> {t('series.buy')}</th><th className="num"><span className="swatch rent" /> {rentName}</th></tr>
             </thead>
             <tbody>
               <tr><td>{t('budget.income')}</td><td className="num">{fmt.eur(income)}</td><td className="num">{fmt.eur(income)}</td></tr>
@@ -221,7 +223,7 @@ export default function Results({ go }: { go: (tab: string) => void }) {
         <div className="table-wrap">
           <table className="table">
             <thead>
-              <tr><th /><th className="num"><span className="swatch buy" /> {t('series.buy')}</th><th className="num"><span className="swatch rent" /> {t('series.rent')}</th></tr>
+              <tr><th /><th className="num"><span className="swatch buy" /> {t('series.buy')}</th><th className="num"><span className="swatch rent" /> {rentName}</th></tr>
             </thead>
             <tbody>
               {sc.market.liquidateAtHorizon ? (
@@ -253,7 +255,7 @@ export default function Results({ go }: { go: (tab: string) => void }) {
                 <th className="num">{t('table.home')}</th>
                 <th className="num">{t('table.debt')}</th>
                 <th className="num">{t('series.buy')}</th>
-                <th className="num">{t('series.rent')}</th>
+                <th className="num">{rentName}</th>
                 <th className="num">{t('series.diff')}</th>
               </tr>
             </thead>

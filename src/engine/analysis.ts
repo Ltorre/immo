@@ -5,6 +5,12 @@ import type { Market, PropertyOption, Scenario, SimResult } from './types'
 
 export const MAX_YEARS = 40
 
+/** Set the gross yearly return of what the money is invested in: the PEA, or the savings account when there is no PEA. */
+export function setInvestReturn(s: Scenario, x: number): void {
+  if (s.market.vehicle === 'savings') s.market.savingsGross = x
+  else s.market.peaReturn = x
+}
+
 function clone<T>(x: T): T {
   return structuredClone(x)
 }
@@ -96,7 +102,7 @@ export function breakEvenPeaReturn(sc: Scenario): Solved {
   return bisect(
     (x) => {
       const s = clone(sc)
-      s.market.peaReturn = x
+      setInvestReturn(s, x)
       return diffAt(s)
     },
     -0.05, 0.2, false,
@@ -174,7 +180,7 @@ export function returnsHeatmap(sc: Scenario, appreciations: number[], peaReturns
     appreciations.map((ap) => {
       const s = clone(sc)
       s.market.homeAppreciation = ap
-      s.market.peaReturn = pr
+      setInvestReturn(s, pr)
       return diffAt(s)
     }),
   )
@@ -187,7 +193,9 @@ export interface Preset {
 
 export function applyPatch(sc: Scenario, patch: Preset['patch']): Scenario {
   const s = clone(sc)
-  Object.assign(s.market, patch)
+  const p = { ...patch }
+  if (s.market.vehicle === 'savings') delete p.peaReturn // the PEA return does not exist without a PEA
+  Object.assign(s.market, p)
   return s
 }
 

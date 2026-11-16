@@ -4,6 +4,7 @@ import { useApp } from '../state'
 
 export default function Profile() {
   const { t, fmt, state, update } = useApp()
+  const noPea = state.market.vehicle === 'savings'
   const p = state.profile
   const free = Math.max(0, p.savings - p.emergencyFund)
   const income = p.netIncomeMonthly - p.incomeTaxMonthly
@@ -32,6 +33,7 @@ export default function Profile() {
       </Card>
 
       <Card title={t('profile.pea')} desc={t('profile.peaDesc')}>
+        {noPea && <Callout kind="info">{t('profile.peaIgnored')}</Callout>}
         <Grid>
           <Num label={t('profile.peaValue')} unit="€" value={p.existingPea.value} step={1000} min={0} onChange={(v) => update((d) => { d.profile.existingPea.value = v })} />
           <Num label={t('profile.peaDeposits')} unit="€" value={p.existingPea.deposits} step={1000} min={0} onChange={(v) => update((d) => { d.profile.existingPea.deposits = v })} tip={t('profile.peaDepositsTip')} />

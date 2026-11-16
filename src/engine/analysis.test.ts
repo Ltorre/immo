@@ -130,3 +130,19 @@ describe('monte carlo', () => {
     expect(t1 - t0).toBeLessThan(5000)
   })
 })
+
+describe('no PEA in the analyses', () => {
+  it('break-even uses the savings rate and the Monte Carlo keeps the savings deterministic', () => {
+    const sc = defaultScenario()
+    sc.market.vehicle = 'savings'
+    sc.market.savingsKind = 'remunerated'
+    sc.market.savingsTax = 'pfu'
+    const be = breakEvenPeaReturn(sc)
+    expect(be.status).toBe('ok')
+    sc.market.savingsGross = be.value!
+    expect(Math.abs(diffAt(sc))).toBeLessThan(5)
+    const mc = monteCarlo(sc, { paths: 200, peaVol: 0.2, homeVol: 0, correlation: 0, seed: 5 })
+    // no randomness left (stocks are not used, the house has no volatility)
+    expect(mc.diffReal.p10).toBeCloseTo(mc.diffReal.p90, 2)
+  })
+})

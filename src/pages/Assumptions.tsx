@@ -1,7 +1,7 @@
 import { MARKET_SNAPSHOT_DATE, REGIMES } from '../engine/defaults'
 import { Button, Callout, Card, Check, Grid, Num, Pct, Select } from '../ui/fields'
 import { useApp } from '../state'
-import { effectiveRent } from '../engine/simulate'
+import { effectiveRent, netSavingsRate, savingsTaxRate, TMI_STEPS } from '../engine/simulate'
 
 export default function Assumptions() {
   const { t, fmt, state, update } = useApp()
@@ -38,6 +38,47 @@ export default function Assumptions() {
         </Grid>
       </Card>
 
+      <Card title={t('ass.vehicle')} desc={t('ass.vehicleDesc')}>
+        <Grid>
+          <Select
+            label={t('ass.vehicleLabel')} value={m.vehicle} tip={t('ass.vehicleTip')}
+            options={[{ value: 'pea', label: t('ass.vehiclePea') }, { value: 'savings', label: t('ass.vehicleSavings') }]}
+            onChange={(v) => update((d) => { d.market.vehicle = v })}
+          />
+          {m.vehicle === 'savings' && (
+            <Select
+              label={t('ass.savingsKind')} value={m.savingsKind}
+              options={[{ value: 'current', label: t('ass.kindCurrent') }, { value: 'remunerated', label: t('ass.kindRemunerated') }]}
+              onChange={(v) => update((d) => { d.market.savingsKind = v })}
+            />
+          )}
+          {m.vehicle === 'savings' && m.savingsKind === 'remunerated' && (
+            <>
+              <Pct label={t('ass.savingsGross')} value={m.savingsGross} step={0.1} min={0} max={0.15} tip={t('ass.savingsGrossTip')} onChange={(v) => update((d) => { d.market.savingsGross = v })} />
+              <Select
+                label={t('ass.savingsTax')} value={m.savingsTax} tip={t('ass.savingsTaxTip')}
+                options={[{ value: 'pfu', label: t('ass.taxPfu') }, { value: 'bareme', label: t('ass.taxBareme') }, { value: 'none', label: t('ass.taxNone') }]}
+                onChange={(v) => update((d) => { d.market.savingsTax = v })}
+              />
+              {m.savingsTax === 'bareme' && (
+                <Select<number>
+                  label={t('ass.tmi')} value={m.marginalRate} tip={t('ass.tmiTip')}
+                  options={TMI_STEPS.map((x) => ({ value: x, label: `${Math.round(x * 100)} %` }))}
+                  onChange={(v) => update((d) => { d.market.marginalRate = v })}
+                />
+              )}
+            </>
+          )}
+        </Grid>
+        {m.vehicle === 'savings' && (
+          <Callout kind="info">
+            {m.savingsKind === 'current'
+              ? t('ass.netCurrent')
+              : t('ass.netRate', { net: fmt.pct(netSavingsRate(m), 2), tax: fmt.pct(savingsTaxRate(m), 1), gross: fmt.pct(m.savingsGross, 2) })}
+          </Callout>
+        )}
+      </Card>
+
       <Card title={t('ass.markets')} desc={t('ass.marketsDesc')}>
         <div className="presets">
           <span className="muted small">{t('ass.presets')}</span>
@@ -48,8 +89,8 @@ export default function Assumptions() {
           ))}
         </div>
         <Grid>
-          <Pct label={t('ass.peaReturn')} value={m.peaReturn} step={0.1} min={-0.1} max={0.25} onChange={(v) => update((d) => { d.market.peaReturn = v })} tip={t('ass.peaReturnTip')} />
-          <Pct label={t('ass.peaFees')} value={m.peaFees} step={0.05} min={0} max={0.05} onChange={(v) => update((d) => { d.market.peaFees = v })} tip={t('ass.peaFeesTip')} />
+          {m.vehicle === 'pea' && <Pct label={t('ass.peaReturn')} value={m.peaReturn} step={0.1} min={-0.1} max={0.25} onChange={(v) => update((d) => { d.market.peaReturn = v })} tip={t('ass.peaReturnTip')} />}
+          {m.vehicle === 'pea' && <Pct label={t('ass.peaFees')} value={m.peaFees} step={0.05} min={0} max={0.05} onChange={(v) => update((d) => { d.market.peaFees = v })} tip={t('ass.peaFeesTip')} />}
           <Pct label={t('ass.homeGrowth')} value={m.homeAppreciation} step={0.1} min={-0.1} max={0.15} onChange={(v) => update((d) => { d.market.homeAppreciation = v })} tip={t('ass.homeGrowthTip')} />
           <Pct label={t('ass.inflation')} value={m.inflation} step={0.1} min={-0.02} max={0.15} onChange={(v) => update((d) => { d.market.inflation = v })} tip={t('ass.inflationTip')} />
           <Pct label={t('ass.chargesGrowth')} value={m.chargesGrowth} step={0.1} min={-0.02} max={0.15} onChange={(v) => update((d) => { d.market.chargesGrowth = v })} tip={t('ass.chargesGrowthTip')} />
@@ -59,14 +100,16 @@ export default function Assumptions() {
 
       <Card title={t('ass.tax')} desc={t('ass.taxDesc')}>
         <Grid>
-          <Num label={t('ass.peaCap')} unit="€" value={m.peaCap} step={5000} min={0} onChange={(v) => update((d) => { d.market.peaCap = v })} tip={t('ass.peaCapTip')} />
+          {m.vehicle === 'pea' && <Num label={t('ass.peaCap')} unit="€" value={m.peaCap} step={5000} min={0} onChange={(v) => update((d) => { d.market.peaCap = v })} tip={t('ass.peaCapTip')} />}
           <Pct label={t('ass.ps')} value={m.psRate} step={0.1} min={0} max={0.5} onChange={(v) => update((d) => { d.market.psRate = v })} tip={t('ass.psTip')} />
           <Pct label={t('ass.pfu')} value={m.pfuRate} step={0.1} min={0} max={0.6} onChange={(v) => update((d) => { d.market.pfuRate = v })} tip={t('ass.pfuTip')} />
-          <Select
-            label={t('ass.overflow')} value={m.overflow} tip={t('ass.overflowTip')}
-            options={[{ value: 'cto', label: t('ass.overflowCto') }, { value: 'cash', label: t('ass.overflowCash') }]}
-            onChange={(v) => update((d) => { d.market.overflow = v })}
-          />
+          {m.vehicle === 'pea' && (
+            <Select
+              label={t('ass.overflow')} value={m.overflow} tip={t('ass.overflowTip')}
+              options={[{ value: 'cto', label: t('ass.overflowCto') }, { value: 'cash', label: t('ass.overflowCash') }]}
+              onChange={(v) => update((d) => { d.market.overflow = v })}
+            />
+          )}
         </Grid>
       </Card>
 

@@ -26,7 +26,7 @@ Ce qu'il reste chaque mois est investi dans les deux cas : la comparaison est do
 |---|---|
 | **Profil** | revenus, prélèvement à la source, dépenses, épargne, épargne de précaution, PEA existant, **crédits en cours** |
 | **Le bien** | plusieurs biens candidats ; notaire (ancien/neuf), agence, travaux, garantie, frais de dossier, prêt principal + **prêts complémentaires** (PTZ, Action Logement, PEL, éco-PTZ) avec conditions d'accès, **testeur d'éligibilité au PTZ** (barème avril 2025), remboursements anticipés, copropriété, taxe foncière (avec exonération), assurance, énergie, entretien, **gros travaux ponctuels**, frais de revente |
-| **Hypothèses** | loyer et indexation, rendement et frais du PEA, plus-value immobilière, inflation, **taux de crédit par durée (modifiables)**, fiscalité du PEA (18,6 % de prélèvements sociaux, flat tax 31,4 %), plafond, scénarios de marché |
+| **Hypothèses** | loyer et indexation, rendement et frais du PEA, plus-value immobilière, inflation, **taux de crédit par durée (modifiables)**, fiscalité du PEA (18,6 % de prélèvements sociaux, flat tax 31,4 %), plafond, scénarios de marché, **option « pas de PEA »** (compte courant, compte rémunérateur : flat tax, barème selon la tranche marginale, ou exonéré) |
 | **Résultats** | verdict, **points morts** (année, hausse du bien, loyer et rendement d'équilibre), courbes de patrimoine, budget mensuel, où part l'argent |
 | **Comparer** | biens candidats vs location, 7 scénarios de marché, **durée du prêt × durée de détention**, niveaux d'apport, grille immobilier × PEA |
 | **Risques** | simulation de **Monte-Carlo** (probabilité que l'achat gagne, éventail des résultats) |
@@ -62,7 +62,7 @@ Whatever is left each month gets invested in both cases, so the comparison is fa
 
 Profile (income, savings, existing PEA, **existing credits**) · several candidate homes with all French ownership costs (notary, agency, guarantee, **extra loans (PTZ, Action Logement, PEL, eco-PTZ) with eligibility notes and a PTZ eligibility tester**,
 property tax, co-ownership, upkeep, big works, resale costs) · editable market assumptions and **mortgage rates by term** · **break-evens** · comparison of homes, market regimes,
-**loan term × holding period**, down payments and a property × PEA return grid · **Monte Carlo** · feasibility (35 % debt ratio, borrowing capacity).
+**loan term × holding period**, down payments and a property × PEA return grid · **no-PEA option** (current account or interest-paying account, flat tax or progressive scale) · **Monte Carlo** · feasibility (35 % debt ratio, borrowing capacity).
 Bilingual, light/dark, share link. **Nothing leaves your browser.**
 
 ---

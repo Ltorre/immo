@@ -21,6 +21,11 @@ export const HCSF_MAX_YEARS = 25
 export const HCSF_MAX_YEARS_WORKS = 27
 
 export const DEFAULT_MARKET: Market = {
+  vehicle: 'pea',
+  savingsKind: 'remunerated',
+  savingsGross: 0.025,
+  savingsTax: 'pfu',
+  marginalRate: 0.3,
   peaReturn: 0.06,
   peaFees: 0.004,
   peaCap: 150_000,

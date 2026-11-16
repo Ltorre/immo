@@ -6,6 +6,38 @@ export function effectiveRent(rent: Scenario['rent'], o: PropertyOption): number
   return rent.equivalentYield !== null && rent.equivalentYield !== undefined ? (o.price * rent.equivalentYield) / 12 : rent.rentMonthly
 }
 
+/** Deductible share of the CSG when interest is taxed on the progressive scale. */
+const CSG_DEDUCTIBLE = 0.068
+export const TMI_STEPS = [0, 0.11, 0.3, 0.41, 0.45]
+
+/** Yearly tax rate on the interest of the savings account. */
+export function savingsTaxRate(m: Market): number {
+  if (m.savingsKind === 'current') return 0
+  switch (m.savingsTax) {
+    case 'none':
+      return 0
+    case 'pfu':
+      return m.pfuRate
+    default:
+      // Progressive scale: income tax at the marginal rate on interest net of the deductible CSG, plus social levies.
+      return Math.min(0.95, m.psRate + m.marginalRate * (1 - CSG_DEDUCTIBLE))
+  }
+}
+
+/** Yearly rate of the savings account once tax is paid (interest is taxed every year, not at withdrawal). */
+export function netSavingsRate(m: Market): number {
+  return m.savingsKind === 'current' ? 0 : m.savingsGross * (1 - savingsTaxRate(m))
+}
+
+/**
+ * With no PEA, the investable money earns the net savings rate: no PEA ceiling, no fund fees and no tax at
+ * withdrawal (already paid each year). The result is flagged `pea` so applying it twice changes nothing.
+ */
+export function resolveMarket(m: Market): Market {
+  if (m.vehicle !== 'savings') return m
+  return { ...m, vehicle: 'pea', peaReturn: netSavingsRate(m), peaFees: 0, peaCap: 0, pfuRate: 0, psRate: 0, overflow: 'cto' }
+}
+
 export function effectiveRate(o: PropertyOption, m: Market): number {
   return o.rateOverride ?? rateForYears(m.rateTable, o.years)
 }
@@ -200,7 +232,10 @@ export function simulate(sc: Scenario, opts: SimOptions = {}): SimResult {
 
 export function runSim(prep: Prepared, paths?: Paths): SimResult {
   const { sc, months, acq, loans, debtAt0, creditPay } = prep
-  const { profile: p, rent, market: m, option: o } = sc
+  const { profile: p, rent, market: m0, option: o } = sc
+  const m = resolveMarket(m0)
+  // Without a PEA, an existing one is ignored.
+  const pea0 = m0.vehicle === 'savings' ? { value: 0, deposits: 0, ageYears: 0 } : p.existingPea
   const rentBase = effectiveRent(rent, o)
 
   // --- Growth factors ---
@@ -210,17 +245,17 @@ export function runSim(prep: Prepared, paths?: Paths): SimResult {
   const livretF = Math.pow(1 + m.livretRate, 1 / 12)
 
   // --- Starting portfolios ---
-  const hasPea = p.existingPea.value > 0 || p.existingPea.deposits > 0
-  const peaAgeMonths0 = hasPea ? Math.max(0, p.existingPea.ageYears) * 12 : 0
+  const hasPea = pea0.value > 0 || pea0.deposits > 0
+  const peaAgeMonths0 = hasPea ? Math.max(0, pea0.ageYears) * 12 : 0
   const emergency = Math.min(Math.max(0, p.emergencyFund), Math.max(0, p.savings))
   const free = Math.max(0, p.savings - emergency)
 
   const makePortfolio = (): Portfolio => {
     const pf = new Portfolio(emergency)
-    pf.peaValue = p.existingPea.value
+    pf.peaValue = pea0.value
     // Without a known deposit total we assume no gain yet (basis = value).
-    pf.peaBasis = p.existingPea.deposits > 0 ? p.existingPea.deposits : p.existingPea.value
-    pf.peaDeposits = Math.max(p.existingPea.deposits, 0)
+    pf.peaBasis = pea0.deposits > 0 ? pea0.deposits : pea0.value
+    pf.peaDeposits = Math.max(pea0.deposits, 0)
     return pf
   }
   const peaTaxAt = (ageMonths: number) => (ageMonths >= 60 ? m.psRate : m.pfuRate)

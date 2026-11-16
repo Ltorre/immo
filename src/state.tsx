@@ -137,6 +137,8 @@ interface Ctx {
   update: (fn: (draft: AppState) => void) => void
   reset: () => void
   t: (key: Key, params?: Record<string, string | number>) => string
+  /** "Rent + PEA" or "Rent + savings", depending on where the money goes. */
+  rentName: string
   fmt: Fmt
   scenario: Scenario
   option: PropertyOption
@@ -211,6 +213,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       update,
       reset,
       t,
+      rentName: t(state.market.vehicle === 'savings' ? 'series.rentSavings' : 'series.rent'),
       fmt: makeFmt(state.lang),
       option,
       scenario: { profile: state.profile, rent: state.rent, market: state.market, option },

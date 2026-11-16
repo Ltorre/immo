@@ -14,7 +14,7 @@ export default function Feasibility() {
   const maxYears = option.kind === 'new' || option.worksInitial > 0 ? HCSF_MAX_YEARS_WORKS : HCSF_MAX_YEARS
   const minDown = a.notary + a.agency + a.guarantee + a.bankFees
   const years = [15, 20, 25]
-  const caps = useMemo(() => years.map((y) => ({ y, c: borrowingCapacity(sc, y, Math.min(a.downPayment, free + p.existingPea.value)) })), [sc, a.downPayment, free, p.existingPea.value])
+  const caps = useMemo(() => years.map((y) => ({ y, c: borrowingCapacity(sc, y, Math.min(a.downPayment, free + (sc.market.vehicle === 'savings' ? 0 : p.existingPea.value))) })), [sc, a.downPayment, free, p.existingPea.value])
   const pctBar = Math.min(100, (dc.ratio / 0.5) * 100)
   const limitPos = (HCSF_MAX_DEBT_RATIO / 0.5) * 100
   const leftover = free - a.downPayment
@@ -47,7 +47,7 @@ export default function Feasibility() {
               <tr><td>{t('feas.minDown')}</td><td className="num">{fmt.eur(minDown)}</td></tr>
               <tr><td>{t('feas.yourDown')}</td><td className="num">{fmt.eur(a.downPayment)}</td></tr>
               <tr><td>{t('feas.downPct')}</td><td className="num">{fmt.pct(a.price > 0 ? a.downPayment / a.price : 0)}</td></tr>
-              <tr><td>{t('feas.available')}</td><td className="num">{fmt.eur(free)}{p.existingPea.value > 0 ? ` + ${fmt.eur(p.existingPea.value)} PEA` : ''}</td></tr>
+              <tr><td>{t('feas.available')}</td><td className="num">{fmt.eur(free)}{sc.market.vehicle !== 'savings' && p.existingPea.value > 0 ? ` + ${fmt.eur(p.existingPea.value)} PEA` : ''}</td></tr>
             </tbody>
           </table>
         </div>

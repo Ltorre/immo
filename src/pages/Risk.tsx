@@ -7,7 +7,7 @@ import { useCutScenario } from '../hooks'
 import CutNotice from '../ui/CutNotice'
 
 export default function Risk() {
-  const { t, fmt, state, update } = useApp()
+  const { t, fmt, state, update, rentName } = useApp()
   const { sc, cut } = useCutScenario()
   const mcp = useDeferredValue(state.mc)
   const mc = useMemo(() => monteCarlo(sc, mcp), [sc, mcp])
@@ -72,9 +72,9 @@ export default function Risk() {
               <tr><th /><th className="num">10 %</th><th className="num">25 %</th><th className="num">{t('risk.medianLine')}</th><th className="num">75 %</th><th className="num">90 %</th></tr>
             </thead>
             <tbody>
-              {([['series.buy', mc.buyerReal], ['series.rent', mc.renterReal], ['series.diff', mc.diffReal]] as const).map(([k, b]) => (
+              {([[t('series.buy'), mc.buyerReal], [rentName, mc.renterReal], [t('series.diff'), mc.diffReal]] as const).map(([k, b]) => (
                 <tr key={k}>
-                  <td>{t(k)}</td>
+                  <td>{k}</td>
                   <td className="num">{fmt.eur(b.p10)}</td><td className="num">{fmt.eur(b.p25)}</td><td className="num">{fmt.eur(b.p50)}</td>
                   <td className="num">{fmt.eur(b.p75)}</td><td className="num">{fmt.eur(b.p90)}</td>
                 </tr>

@@ -265,3 +265,74 @@ describe('rent tied to the price', () => {
     expect(simulate(a).year1.rentHousingCash).toBeCloseTo(1640 + (a.rent.insuranceAnnual + a.rent.energyAnnual) / 12, 6)
   })
 })
+
+describe('no PEA: savings account', () => {
+  /** No flows at all: income exactly covers spending and rent, so only the interest moves the capital. */
+  function idle(): Scenario {
+    const sc = flat()
+    sc.profile.savings = 100_000
+    sc.profile.emergencyFund = 0
+    sc.profile.netIncomeMonthly = 3000
+    sc.profile.incomeTaxMonthly = 0
+    sc.profile.livingExpensesMonthly = 3000
+    sc.rent.rentMonthly = 0
+    sc.rent.insuranceAnnual = 0
+    sc.rent.energyAnnual = 0
+    sc.market.psRate = 0.186
+    sc.market.pfuRate = 0.314
+    sc.market.vehicle = 'savings'
+    return sc
+  }
+
+  it('a current account earns nothing: capital is unchanged', () => {
+    const sc = idle(); sc.market.savingsKind = 'current'; sc.market.savingsGross = 0.05
+    const end = atHorizon(simulate(sc), 10)
+    expect(end.renterNet).toBeCloseTo(100_000, 4)
+  })
+
+  it('flat tax: interest is taxed every year at 31.4 %', () => {
+    const sc = idle(); Object.assign(sc.market, { savingsKind: 'remunerated', savingsGross: 0.04, savingsTax: 'pfu' })
+    const end = atHorizon(simulate(sc), 10)
+    expect(end.renterNet).toBeCloseTo(100_000 * Math.pow(1 + 0.04 * (1 - 0.314), 10), 2)
+  })
+
+  it('progressive scale: marginal rate on interest net of the deductible CSG, plus social levies', () => {
+    const sc = idle(); Object.assign(sc.market, { savingsKind: 'remunerated', savingsGross: 0.04, savingsTax: 'bareme', marginalRate: 0.3 })
+    const tax = 0.186 + 0.3 * (1 - 0.068)
+    const end = atHorizon(simulate(sc), 10)
+    expect(end.renterNet).toBeCloseTo(100_000 * Math.pow(1 + 0.04 * (1 - tax), 10), 2)
+    // a 0 % bracket only pays the social levies
+    sc.market.marginalRate = 0
+    expect(atHorizon(simulate(sc), 10).renterNet).toBeCloseTo(100_000 * Math.pow(1 + 0.04 * (1 - 0.186), 10), 2)
+  })
+
+  it('exempt savings (regulated) pay no tax', () => {
+    const sc = idle(); Object.assign(sc.market, { savingsKind: 'remunerated', savingsGross: 0.03, savingsTax: 'none' })
+    expect(atHorizon(simulate(sc), 10).renterNet).toBeCloseTo(100_000 * Math.pow(1.03, 10), 2)
+  })
+
+  it('has no PEA ceiling and ignores an existing PEA', () => {
+    const sc = idle(); Object.assign(sc.market, { savingsKind: 'current' })
+    sc.profile.savings = 400_000
+    sc.profile.existingPea = { value: 50_000, deposits: 40_000, ageYears: 8 }
+    const r = simulate(sc)
+    expect(r.years[0].renterPea).toBe(0)
+    expect(atHorizon(r, 5).renterNet).toBeCloseTo(400_000, 3)
+  })
+
+  it('the buyer books still balance in savings mode', () => {
+    const sc = flat(); sc.market.vehicle = 'savings'; sc.market.savingsKind = 'current'
+    const res = simulate(sc); const a = res.acquisition; const end = atHorizon(res, 10); const p = sc.profile
+    const c = end.cum
+    const spent = c.interest + c.loanInsurance + c.principal + c.propertyTax + c.copro + c.insurance + c.energy + c.maintenance + c.oneOffs
+    const expected = a.initialValue + (p.savings - a.downPayment) + 120 * (p.netIncomeMonthly - p.incomeTaxMonthly - p.livingExpensesMonthly) - spent - (a.mainLoan + a.extraLoansTotal - c.principal)
+    expect(end.buyerNet).toBeCloseTo(expected, 3)
+  })
+
+  it('is idempotent: resolving an already resolved market changes nothing', async () => {
+    const { resolveMarket } = await import('./simulate')
+    const m = idle().market
+    const once = resolveMarket(m)
+    expect(resolveMarket(once)).toEqual(once)
+  })
+})

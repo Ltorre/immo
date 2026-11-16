@@ -61,7 +61,22 @@ export interface RatePoint {
 
 export type OverflowVehicle = 'cto' | 'cash'
 
+/** Where the money to invest goes: a PEA of equity ETFs, or a plain savings account (no PEA). */
+export type InvestVehicle = 'pea' | 'savings'
+/** Savings account: a current account (0 %) or a paying account with a gross yearly rate. */
+export type SavingsKind = 'current' | 'remunerated'
+/** How the interest is taxed: flat tax, progressive scale (marginal rate) or exempt (regulated savings). */
+export type SavingsTax = 'pfu' | 'bareme' | 'none'
+
 export interface Market {
+  /** `pea` (default): equity ETFs in a PEA. `savings`: no PEA, money sits on a savings account. */
+  vehicle: InvestVehicle
+  savingsKind: SavingsKind
+  /** Gross yearly interest rate of the savings account (remunerated kind). */
+  savingsGross: number
+  savingsTax: SavingsTax
+  /** Marginal income tax rate (TMI), used when the interest is taxed on the progressive scale. */
+  marginalRate: number
   /** Expected yearly gross return of the equity ETF held in the PEA (nominal, before fees). */
   peaReturn: number
   /** Yearly all-in fees: fund TER + broker custody fees. */

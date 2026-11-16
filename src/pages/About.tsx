@@ -56,6 +56,7 @@ function Fr() {
           <li>Charges de copropriété, taxe foncière (avec années d’exonération), assurance propriétaire, énergie, entretien en % de la valeur du bien, gros travaux ponctuels.</li>
           <li>Côté location : loyer, indexation, assurance, énergie.</li>
           <li>PEA : plafond de versements de 150 000 €, frais annuels du support, fiscalité (après 5 ans, uniquement les prélèvements sociaux sur les gains ; avant 5 ans, flat tax) ; au-delà du plafond, CTO (flat tax) ou livret.</li>
+          <li>Pas de PEA ? L’épargne peut rester sur un compte courant (0 %) ou un compte rémunérateur (rendement brut, flat tax, barème selon votre tranche marginale, ou exonéré).</li>
           <li>Crédits en cours (mensualité et durée restante), PEA existant (vendu en partie pour l’apport si besoin, impôt compris), épargne de précaution jamais investie.</li>
           <li>Évolution des revenus, inflation (vue en euros constants), évolution des charges.</li>
           <li>Plus-value sur la résidence principale : exonérée d’impôt. Taxe d’habitation : supprimée sur la résidence principale.</li>
@@ -117,6 +118,7 @@ function En() {
           <li>Co-ownership charges, property tax (with exemption years), owner insurance, energy, upkeep as a share of the property value, one-off big works.</li>
           <li>Renting side: rent, indexation, insurance, energy.</li>
           <li>PEA: €150,000 deposit ceiling, yearly fund fees, taxation (after 5 years only social levies on gains; before, the flat tax); above the ceiling money goes to a taxable account (flat tax) or a savings account.</li>
+          <li>No PEA? Savings can stay on a current account (0 %) or an interest-paying account (gross rate, flat tax, progressive scale at your marginal rate, or exempt).</li>
           <li>Existing credits (instalment and remaining term), existing PEA (partly sold for the down payment if needed, tax included), emergency fund that is never invested.</li>
           <li>Income growth, inflation (shown in constant euros), growth of running costs.</li>
           <li>Capital gain on the main residence: tax exempt. Housing tax (taxe d’habitation): abolished on the main residence.</li>

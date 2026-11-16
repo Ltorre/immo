@@ -15,6 +15,7 @@ const HORIZONS = [5, 7, 10, 15, 20, 25, 30]
 const DOWN_SHARES = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5]
 const APPRECIATIONS = [-0.02, -0.01, 0, 0.01, 0.02, 0.03, 0.04, 0.05]
 const PEA_RETURNS = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]
+const SAVINGS_RETURNS = [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06]
 
 export default function Compare() {
   const { state } = useApp()
@@ -120,7 +121,7 @@ function Regimes({ sc, real }: { sc: Sc; real: boolean }) {
           <thead>
             <tr>
               <th>{t('cmp.regime')}</th>
-              <th className="num">{t('ass.peaReturn')}</th>
+              <th className="num">{sc.market.vehicle === 'savings' ? t('ass.savingsGross') : t('ass.peaReturn')}</th>
               <th className="num">{t('ass.homeGrowth')}</th>
               <th className="num">{t('ass.rentGrowth')}</th>
               <th className="num">{t('cmp.advantage', { years: sc.market.horizonYears })}</th>
@@ -130,7 +131,7 @@ function Regimes({ sc, real }: { sc: Sc; real: boolean }) {
             {rows.map((r) => (
               <tr key={r.id} className={r.id === 'current' ? 'hl' : ''}>
                 <td>{r.id === 'current' ? t('cmp.yourAssumptions') : t(`regime.${r.id}` as 'regime.central')}</td>
-                <td className="num">{fmt.pct(r.sc.market.peaReturn)}</td>
+                <td className="num">{fmt.pct(r.sc.market.vehicle === 'savings' ? (r.sc.market.savingsKind === 'current' ? 0 : r.sc.market.savingsGross) : r.sc.market.peaReturn)}</td>
                 <td className="num">{fmt.pct(r.sc.market.homeAppreciation)}</td>
                 <td className="num">{fmt.pct(r.sc.market.rentGrowth)}</td>
                 <td className="num cell" style={divergingStyle(r.diff, max)}>{fmt.signed(r.diff)}</td>
@@ -225,15 +226,17 @@ function DownPayments({ sc, real }: { sc: Sc; real: boolean }) {
 
 function Heatmap({ sc, real }: { sc: Sc; real: boolean }) {
   const { t, fmt } = useApp()
+  const savings = sc.market.vehicle === 'savings'
+  const RETURNS = savings ? SAVINGS_RETURNS : PEA_RETURNS
   const grid = useMemo(() => {
-    const raw = returnsHeatmap(sc, APPRECIATIONS, PEA_RETURNS)
+    const raw = returnsHeatmap(sc, APPRECIATIONS, RETURNS)
     const h = Math.max(1, Math.round(sc.market.horizonYears))
     return real ? raw.map((row) => row.map((v) => toReal(v, h, sc.market.inflation))) : raw
-  }, [sc, real])
+  }, [sc, real, RETURNS])
   const max = Math.max(1, ...grid.flat().map(Math.abs))
   const nearest = (arr: number[], v: number) => arr.reduce((b, x, i) => (Math.abs(x - v) < Math.abs(arr[b] - v) ? i : b), 0)
   const ci = nearest(APPRECIATIONS, sc.market.homeAppreciation)
-  const cj = nearest(PEA_RETURNS, sc.market.peaReturn)
+  const cj = nearest(RETURNS, savings ? sc.market.savingsGross : sc.market.peaReturn)
   return (
     <Card title={t('cmp.heat')} desc={t('cmp.heatDesc', { years: sc.market.horizonYears })}>
       <Legend />
@@ -241,12 +244,12 @@ function Heatmap({ sc, real }: { sc: Sc; real: boolean }) {
         <table className="table compact grid-table">
           <thead>
             <tr>
-              <th>{t('cmp.heatAxis')}</th>
+              <th>{t(savings ? 'cmp.heatAxisSavings' : 'cmp.heatAxis')}</th>
               {APPRECIATIONS.map((a) => <th key={a} className="num">{fmt.pct(a, 0)}</th>)}
             </tr>
           </thead>
           <tbody>
-            {PEA_RETURNS.map((p, j) => (
+            {RETURNS.map((p, j) => (
               <tr key={p}>
                 <th scope="row">{fmt.pct(p, 0)}</th>
                 {APPRECIATIONS.map((a, i) => (
@@ -259,7 +262,7 @@ function Heatmap({ sc, real }: { sc: Sc; real: boolean }) {
           </tbody>
         </table>
       </div>
-      <p className="muted small">{t('cmp.heatNote')}</p>
+      <p className="muted small">{t(savings ? 'cmp.heatNoteSavings' : 'cmp.heatNote')}</p>
     </Card>
   )
 }

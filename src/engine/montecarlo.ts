@@ -1,4 +1,4 @@
-import { prepareSim, runSim, toReal, type Paths } from './simulate'
+import { prepareSim, resolveMarket, runSim, toReal, type Paths } from './simulate'
 import type { Scenario } from './types'
 
 export interface McParams {
@@ -113,6 +113,10 @@ export function monteCarlo(sc: Scenario, mc: McParams = DEFAULT_MC): McResult {
   const months = horizon * 12
   const prep = prepareSim(sc, months)
   const rand = rng(mc.seed)
+  // Without a PEA the investment earns a known rate: only the property price is random.
+  const noPea = sc.market.vehicle === 'savings'
+  const rsc: Scenario = noPea ? { ...sc, market: resolveMarket(sc.market) } : sc
+  const mcEff: McParams = noPea ? { ...mc, peaVol: 0 } : mc
   const n = mc.paths
   const infl = sc.market.inflation
   const fanVals: Float64Array[] = Array.from({ length: horizon + 1 }, () => new Float64Array(n))
@@ -123,7 +127,7 @@ export function monteCarlo(sc: Scenario, mc: McParams = DEFAULT_MC): McResult {
   let ruinB = 0
   let ruinR = 0
   for (let i = 0; i < n; i++) {
-    const paths = randomPaths(sc, months, mc, rand)
+    const paths = randomPaths(rsc, months, mcEff, rand)
     const res = runSim(prep, paths)
     for (let y = 0; y <= horizon; y++) fanVals[y][i] = toReal(res.years[y].diff, y, infl)
     const end = res.years[horizon]
